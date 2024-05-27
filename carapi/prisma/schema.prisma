@@ -1,0 +1,45 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String
+  password  String
+  name      String?
+  lastName  String?
+  email     String?
+  isAdmin   Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  // Define the opposite relation field for the "cars" relation
+  cars      Car[]     @relation("car")
+}
+
+model Car {
+  id          Int       @id @default(autoincrement())
+  manufacturer String
+  model       String
+  pictures    String    // Removed brackets to make it a single string
+  description String
+  price       Float
+  location    String
+  userId      Int       // Foreign key referencing the user who owns the car
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user        User      @relation("car", fields: [userId], references: [id]) // Specify the opposite field
+}
