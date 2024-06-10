@@ -37,11 +37,11 @@ router.post('/login', async (req, res) => {
     }
 
     const token = jwt.sign(
-      { username: user.username, isAdmin: user.isAdmin },
+      {userId: user.id,username: user.username, isAdmin: user.isAdmin },
       'your_secret_key',
       { expiresIn: '1h' }
     );
-    res.status(200).json({ message: 'Authentication successful', token });
+    res.status(200).json({ message: 'Authentication successful', userId: user.id, token });
   } catch (error) {
     console.error('Error authenticating user:', error);
     res.status(500).json({ error: 'Internal server error' });
