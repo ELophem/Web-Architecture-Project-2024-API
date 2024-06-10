@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
+const jwt = require('jsonwebtoken');
 
 const prisma = new PrismaClient();
 
@@ -64,8 +65,29 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE /api/cars/:id
-router.delete('/:id', async (req, res) => {
+
+const verifyAdminToken = (req, res, next) => {
+  const token = req.headers['authorization'];
+  if (!token) {
+    return res.status(403).json({ error: 'No token provided' });
+  }
+
+  jwt.verify(token.split(' ')[1], 'your_secret_key', (err, decoded) => {
+    if (err) {
+      return res.status(500).json({ error: 'Failed to authenticate token' });
+    }
+
+    if (!decoded.isAdmin) {
+      return res.status(403).json({ error: 'Admin privileges required' });
+    }
+
+    req.userId = decoded.id;
+    next();
+  });
+};
+
+
+router.delete('/:id', verifyAdminToken, async (req, res) => {
   const carId = parseInt(req.params.id);
 
   try {
@@ -79,5 +101,6 @@ router.delete('/:id', async (req, res) => {
     res.status(500).json({ error: 'An error occurred' });
   }
 });
+
 
 module.exports = router;
